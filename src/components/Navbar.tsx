@@ -5,7 +5,10 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useDisclosure } from "@mantine/hooks";
 import { Burger, Drawer, Text, Button, Group } from "@mantine/core";
-import { IconLogin, IconShoppingCart } from "@tabler/icons-react";
+import {
+  IconLogin,
+  IconShoppingCart,
+} from "@tabler/icons-react";
 import { useCartStore } from "@/store/useCartStore";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -14,6 +17,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const [activePath, setActivePath] = useState<string | null>(null);
   const cart = useCartStore((s) => s.cart);
+  const clearCart = useCartStore((s) => s.clearCart);
 
   //eslint-disable-next-line
   const [user, setUser] = useState<any>(null);
@@ -37,9 +41,15 @@ export default function Navbar() {
   }, [pathname]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem("cart-storage");
-    setUser(null);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      localStorage.removeItem("cart-storage");
+      clearCart(); 
+      setUser(null);
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   const navLinks = [
@@ -75,7 +85,11 @@ export default function Navbar() {
 
         <Group gap="sm" visibleFrom="sm">
           {user ? (
-            <Button variant="default" size="xs" onClick={handleLogout}>
+            <Button
+              variant="default"
+              size="xs"
+              onClick={handleLogout}
+            >
               Logout
             </Button>
           ) : (
