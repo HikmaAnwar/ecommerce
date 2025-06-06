@@ -11,6 +11,7 @@ import {
 } from "@tabler/icons-react";
 import { useCartStore } from "@/store/useCartStore";
 import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [opened, { toggle }] = useDisclosure(false);
@@ -21,6 +22,7 @@ export default function Navbar() {
 
   //eslint-disable-next-line
   const [user, setUser] = useState<any>(null);
+  const router = useRouter();
 
   useEffect(() => {
     setActivePath(pathname);
@@ -47,6 +49,7 @@ export default function Navbar() {
       localStorage.removeItem("cart-storage");
       clearCart(); 
       setUser(null);
+      router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
     }
